@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Keystroke Biometric System</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="glass-panel">
+        <header>
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/>
+                    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <h2>Welcome Back! 👋</h2>
+            </div>
+            <!-- Removed the clinical tabs -->
+        </header>
+
+        <main>
+            <div id="status-container" class="status-container hidden">
+                <div class="status-icon"></div>
+                <p id="status-message">Awaiting input...</p>
+            </div>
+
+            <div class="form-container">
+                <div class="input-group">
+                    <label for="username">Who are you logging in as?</label>
+                    <input type="text" id="username" placeholder="e.g. s002" autocomplete="off">
+                </div>
+
+                <div class="instruction">
+                    <p>To make sure it's really you, we look at <em>how</em> you type. Please type this password exactly as it appears:</p>
+                    <div class="passphrase">.tie5Roanl</div>
+                </div>
+
+                <div class="input-group">
+                    <label for="passphrase-input">Your typing area ✨</label>
+                    <input type="text" id="passphrase-input" placeholder="Start typing here..." autocomplete="off" onpaste="return false;" ondrop="return false;">
+                </div>
+                
+                <button id="action-btn" class="primary-btn" disabled>Log in</button>
+            </div>
+            
+        </main>
+    </div>
+
+    <!-- Background decorative elements -->
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>

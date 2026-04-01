@@ -1,0 +1,261 @@
+:root {
+    --bg-color: #1a1a1f;  /* Deep dark charcoal */
+    --panel-bg: rgba(35, 35, 42, 0.65); /* Slightly lighter dark panel */
+    --panel-border: rgba(255, 255, 255, 0.06); /* Subtle white border */
+    --primary: #ff847c;
+    --primary-hover: #ff9d97;
+    --accent: #ff847c;
+    --text-main: #f0f0f5;
+    --text-dim: #9aa2ac;
+    --error: #fb7185;
+    --font-ui: 'Outfit', sans-serif;
+    --font-mono: 'Outfit', monospace;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative;
+    /* Soft gradient overlay */
+    background-image: 
+        radial-gradient(at 0% 0%, hsla(28, 50%, 15%, 1) 0, transparent 50%), 
+        radial-gradient(at 50% 0%, hsla(340, 50%, 15%, 1) 0, transparent 50%), 
+        radial-gradient(at 100% 0%, hsla(22, 50%, 15%, 1) 0, transparent 50%);
+    background-size: 150% 150%;
+    animation: gradientMove 15s ease infinite;
+}
+
+@keyframes gradientMove {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Background effects */
+.blob {
+    position: absolute;
+    filter: blur(60px);
+    z-index: -1;
+    opacity: 0.6;
+    border-radius: 50%;
+    animation: float 8s infinite ease-in-out alternate;
+}
+
+.blob-1 {
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,132,124,0.15) 0%, rgba(255,132,124,0) 70%);
+    top: -50px;
+    left: -100px;
+}
+
+.blob-2 {
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255,197,161,0.2) 0%, rgba(255,197,161,0) 70%);
+    bottom: -50px;
+    right: -50px;
+    animation-delay: -3s;
+}
+
+@keyframes float {
+    0% { transform: translateY(0) scale(1); }
+    100% { transform: translateY(30px) scale(1.05); }
+}
+
+/* Main Panel (Glassmorphism) */
+.glass-panel {
+    background: var(--panel-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--panel-border);
+    border-radius: 32px;
+    padding: 48px;
+    width: 100%;
+    max-width: 460px;
+    box-shadow: 0 30px 60px -15px rgba(255, 132, 124, 0.2), 0 10px 30px -10px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+}
+
+/* Header & Tabs */
+header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--primary);
+}
+
+.logo svg {
+    filter: drop-shadow(0 4px 6px rgba(255, 132, 124, 0.3));
+}
+
+.logo h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    color: var(--text-main);
+}
+
+/* Form Elements */
+.form-container {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+input[type="text"] {
+    background: rgba(0, 0, 0, 0.25);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 18px;
+    color: var(--text-main);
+    font-family: var(--font-ui);
+    font-size: 1.05rem;
+    transition: all 0.3s ease;
+    outline: none;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+input[type="text"]:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px rgba(255, 132, 124, 0.15), inset 0 2px 4px rgba(0,0,0,0.1);
+    background: rgba(0, 0, 0, 0.4);
+}
+
+input[type="text"]::placeholder {
+    color: #6b7280;
+}
+
+.instruction p {
+    font-size: 1rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.passphrase {
+    background: rgba(255, 132, 124, 0.08);
+    border: 2px dashed rgba(255, 132, 124, 0.3);
+    padding: 16px;
+    border-radius: 16px;
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 600;
+    text-align: center;
+    color: var(--primary);
+    letter-spacing: 0.05em;
+    user-select: none;
+}
+
+/* Buttons */
+.primary-btn {
+    background: var(--primary);
+    color: white;
+    border: none;
+    padding: 18px;
+    border-radius: 16px;
+    font-family: var(--font-ui);
+    font-weight: 600;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 20px -5px rgba(255, 132, 124, 0.4);
+    margin-top: 8px;
+}
+
+.primary-btn:hover:not(:disabled) {
+    background: var(--primary-hover);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px -5px rgba(255, 132, 124, 0.5);
+}
+
+.primary-btn:active:not(:disabled) {
+    transform: translateY(0px);
+    box-shadow: 0 5px 10px -2px rgba(255, 132, 124, 0.4);
+}
+
+.primary-btn:disabled {
+    background: rgba(255, 255, 255, 0.1);
+    color: #6b7280;
+    cursor: not-allowed;
+    box-shadow: none;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Status Notifications */
+.status-container {
+    padding: 16px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.status-container.hidden {
+    display: none;
+}
+
+.status-container.success {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: #34d399;
+}
+
+.status-container.error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: var(--error);
+}
+
+.status-icon {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+}
+
+.success .status-icon { background: #10b981; box-shadow: 0 0 8px #10b981; }
+.error .status-icon { background: var(--error); box-shadow: 0 0 8px var(--error); }
