@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cataract Detection API Test</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
+        .result-box { margin-top: 20px; padding: 15px; border-radius: 5px; background: #f0f0f0; display: none; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h2>Test the Cataract Classification API</h2>
+    <p>Upload an eye image to test the model via the local API.</p>
+    
+    <form id="uploadForm">
+        <input type="file" id="imageInput" accept="image/*" required>
+        <button type="submit" id="submitBtn">Analyze Image</button>
+    </form>
+
+    <div id="loading" style="display: none; margin-top: 15px;">Analyzing...</div>
+    
+    <div id="result" class="result-box"></div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const fileInput = document.getElementById('imageInput');
+            const resultBox = document.getElementById('result');
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (fileInput.files.length === 0) return;
+
+            // Prepare the FormData
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            resultBox.style.display = 'none';
+            loading.style.display = 'block';
+            submitBtn.disabled = true;
+
+            try {
+                // The API requires basic authentication
+                const username = "prince_admin";
+                const password = "secure_password123";
+                const authHeader = "Basic " + btoa(username + ":" + password);
+
+                const response = await fetch('http://127.0.0.1:5000/predict', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'Authorization': authHeader
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultBox.innerHTML = `
+                        <h3>Result: ${data.prediction}</h3>
+                        <p>Confidence: ${data.confidence}</p>
+                    `;
+                    resultBox.style.borderLeft = data.prediction.includes('Cataract') ? '4px solid #f44336' : '4px solid #4CAF50';
+                } else {
+                    resultBox.innerHTML = `<p class="error">Error: ${data.message || data.error || 'Unknown error occurred'}</p>`;
+                }
+            } catch (err) {
+                resultBox.innerHTML = `<p class="error">Connection Error: Could not reach the API. Is it running?</p><p><small>${err.message}</small></p>`;
+            } finally {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                resultBox.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
