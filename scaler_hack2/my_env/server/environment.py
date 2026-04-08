@@ -294,4 +294,4 @@ class SmartRadioEnvironment(Environment[SpectrumAction, SpectrumObservation, Spe
             pre_shift_throughput=self._pre_shift_throughput,
             post_shift_throughput=self._post_shift_throughput,
         )
-        return max(0.0001, min(0.9999, float(raw_score)))
+        return 0.01 + (0.98 * float(raw_score))

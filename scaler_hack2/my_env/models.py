@@ -159,7 +159,7 @@ class SpectrumState(State):
 
     # Grader outputs
     grader_score: float = Field(
-        default=0.0,
+        default=0.01,
         ge=0.0,
         le=1.0,
         description="Current grader score ∈ [0.0, 1.0]. Varies with agent behavior.",
