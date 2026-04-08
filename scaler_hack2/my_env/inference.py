@@ -50,62 +50,64 @@ def run_inference():
     from server.environment import SmartRadioEnvironment
     from models import SpectrumAction
 
-    # We only run Easy task (task_id=1) as requested
-    task_id = 1
-    seed = 42
+    TASKS = [1, 2, 3]
+    SEEDS = [42, 123, 456]
 
-    env = SmartRadioEnvironment(task_id=task_id)
-    obs = env.reset(seed=seed)
-    task_name = env.state.task_name.replace(" ", "_") # ensure no spaces for the grader metric value
+    for i in range(len(TASKS)):
+        task_id = TASKS[i]
+        seed = SEEDS[i]
 
-    # [START] task=<task_name> env=<benchmark> model=<model_name>
-    print(f"[START] task={task_name} env=smart_radio model={MODEL_NAME}", flush=True)
+        env = SmartRadioEnvironment(task_id=task_id)
+        obs = env.reset(seed=seed)
+        task_name = env.state.task_name.replace(" ", "_") # ensure no spaces for the grader metric value
 
-    step_count = 0
-    rewards_list = []
-    
-    while not obs.done:
-        obs_text = obs.to_text()
-        error_msg = "null"
-        action_str = ""
+        # [START] task=<task_name> env=<benchmark> model=<model_name>
+        print(f"[START] task={task_name} env=smart_radio model={MODEL_NAME}", flush=True)
+
+        step_count = 0
+        rewards_list = []
         
-        try:
-            action_dict = llm_act(obs_text)
-            action = SpectrumAction(
-                channel_id=int(action_dict.get("channel_id", 0)),
-                tx_power_dbm=float(action_dict.get("tx_power_dbm", 20.0)),
-            )
-            # Make sure action_str has no spaces
-            action_str = f"ch:{action.channel_id}_pwr:{action.tx_power_dbm}"
-        except Exception as e:
-            error_msg = str(e).replace('\n', ' ')
-            action = SpectrumAction(channel_id=0, tx_power_dbm=20.0) # fallback
-            action_str = f"ch:{action.channel_id}_pwr:{action.tx_power_dbm}"
+        while not obs.done:
+            obs_text = obs.to_text()
+            error_msg = "null"
+            action_str = ""
+            
+            try:
+                action_dict = llm_act(obs_text)
+                action = SpectrumAction(
+                    channel_id=int(action_dict.get("channel_id", 0)),
+                    tx_power_dbm=float(action_dict.get("tx_power_dbm", 20.0)),
+                )
+                action_str = f"ch:{action.channel_id}_pwr:{action.tx_power_dbm}"
+            except Exception as e:
+                error_msg = str(e).replace('\n', ' ')
+                action = SpectrumAction(channel_id=0, tx_power_dbm=20.0) # fallback
+                action_str = f"ch:{action.channel_id}_pwr:{action.tx_power_dbm}"
 
-        # execute step
-        try:
-            obs = env.step(action)
-            step_reward = obs.last_reward
-            rewards_list.append(step_reward)
-        except Exception as e:
-            error_msg = str(e).replace('\n', ' ')
-            step_reward = 0.0
-            rewards_list.append(step_reward)
-            obs.done = True  # force end on exception for safety
-        
-        step_count += 1
-        done_str = "true" if obs.done else "false"
-        
-        # [STEP] step=<n> action=<action_str> reward=<0.00> done=<true|false> error=<msg|null>
-        print(f"[STEP] step={step_count} action={action_str} reward={step_reward:.2f} done={done_str} error={error_msg}", flush=True)
+            # execute step
+            try:
+                obs = env.step(action)
+                step_reward = obs.last_reward
+                rewards_list.append(step_reward)
+            except Exception as e:
+                error_msg = str(e).replace('\n', ' ')
+                step_reward = 0.0
+                rewards_list.append(step_reward)
+                obs.done = True  # force end on exception for safety
+            
+            step_count += 1
+            done_str = "true" if obs.done else "false"
+            
+            # [STEP] step=<n> action=<action_str> reward=<0.00> done=<true|false> error=<msg|null>
+            print(f"[STEP] step={step_count} action={action_str} reward={step_reward:.2f} done={done_str} error={error_msg}", flush=True)
 
-    # Post-episode
-    state = env.state
-    success_str = "true" if state.grader_score > 0.5 else "false"
-    rewards_str = ",".join(f"{r:.2f}" for r in rewards_list)
+        # Post-episode
+        state = env.state
+        success_str = "true" if state.grader_score > 0.5 else "false"
+        rewards_str = ",".join(f"{r:.2f}" for r in rewards_list)
 
-    # [END] success=<true|false> steps=<n> rewards=<r1,r2,...,rn>
-    print(f"[END] success={success_str} steps={step_count} rewards={rewards_str}", flush=True)
+        # [END] success=<true|false> steps=<n> rewards=<r1,r2,...,rn>
+        print(f"[END] success={success_str} steps={step_count} rewards={rewards_str}", flush=True)
 
 if __name__ == "__main__":
     run_inference()

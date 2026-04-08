@@ -284,7 +284,7 @@ class SmartRadioEnvironment(Environment[SpectrumAction, SpectrumObservation, Spe
 
     def _compute_grader_score(self) -> float:
         """Dispatch to the active task's grade() function."""
-        return self._task_module.grade(
+        raw_score = self._task_module.grade(
             collision_count=self._collision_count,
             total_steps=max(self._step_count, 1),
             total_throughput=self._total_throughput,
@@ -294,3 +294,4 @@ class SmartRadioEnvironment(Environment[SpectrumAction, SpectrumObservation, Spe
             pre_shift_throughput=self._pre_shift_throughput,
             post_shift_throughput=self._post_shift_throughput,
         )
+        return max(0.0001, min(0.9999, float(raw_score)))
