@@ -1,0 +1,12 @@
+{
+  "id": "ui_med_conversion",
+  "name": "Persuasive Path",
+  "description": "Guide a distracted user to click a CTA.",
+  "module": "server.environment",
+  "class": "AdaptiveUIEnv",
+  "param_overrides": {
+    "task_id": "ui_med_conversion",
+    "decay_rate": 0.05,
+    "annoyance_multiplier": 1.2
+  }
+}

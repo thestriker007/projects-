@@ -1,0 +1,12 @@
+{
+  "id": "ui_hard_fatigue",
+  "name": "The Aesthetic Balance",
+  "description": "Maximize clicks while keeping Annoyance <0.4.",
+  "module": "server.environment",
+  "class": "AdaptiveUIEnv",
+  "param_overrides": {
+    "task_id": "ui_hard_fatigue",
+    "decay_rate": 0.1,
+    "annoyance_multiplier": 2.0
+  }
+}

@@ -1,0 +1,22 @@
+version: "1.0"
+name: "Adaptive-UI-Gym"
+description: "RL for Dynamic UX Personalization"
+author: "Prince Roy"
+enrollment_number: "23beccs40"
+python_path: "server"
+tasks:
+  - id: "ui_easy_retention"
+    name: "Gentle Onboarding"
+    module: "server.environment"
+    class: "AdaptiveUIEnv"
+    params: {"task_id": "easy", "decay_rate": 0.01}
+  - id: "ui_med_conversion"
+    name: "Persuasive Path"
+    module: "server.environment"
+    class: "AdaptiveUIEnv"
+    params: {"task_id": "medium", "decay_rate": 0.05}
+  - id: "ui_hard_fatigue"
+    name: "The Aesthetic Balance"
+    module: "server.environment"
+    class: "AdaptiveUIEnv"
+    params: {"task_id": "hard", "decay_rate": 0.1, "annoyance_multiplier": 2.0}
