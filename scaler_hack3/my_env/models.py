@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 from typing import Literal
-from openenv.core.models import Action, Observation
+from openenv.core import Action, Observation
 
 class UIAction(Action):
     layout: Literal["grid", "list", "hero"] = Field(..., description="UI layout type")

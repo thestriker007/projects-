@@ -7,6 +7,9 @@ API_BASE_URL = os.getenv("API_BASE_URL", "https://router.huggingface.co/hf-infer
 MODEL_NAME = os.getenv("MODEL_NAME", "meta-llama/Llama-3.2-1B-Instruct")
 HF_TOKEN = os.getenv("HF_TOKEN")
 
+# Optional -- if you use from_docker_image():
+LOCAL_IMAGE_NAME = os.getenv("LOCAL_IMAGE_NAME")
+
 if HF_TOKEN is None:
     raise ValueError("HF_TOKEN environment variable is required")
 

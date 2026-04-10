@@ -1,7 +1,7 @@
 import numpy as np
 import math
 from typing import Dict, Any, Optional
-from openenv.core.env_server import Environment, StepResult
+from openenv.core.env_server import Environment
 from models import UIAction, UIObservation
 from pydantic import BaseModel
 
@@ -39,7 +39,7 @@ class AdaptiveUIEnv(Environment):
         sig = 1.0 / (1.0 + math.exp(-k * (r - r_mid)))
         return float(np.clip(0.01 + 0.98 * sig, 0.01, 0.99))
 
-    def step(self, action: UIAction) -> StepResult:
+    def step(self, action: UIAction, timeout_s: Optional[float] = None, **kwargs) -> UIObservation:
         self.state.session_duration += 1.0
         
         # 1. Physics: Simulate User Reaction based on UI Choices
@@ -116,4 +116,7 @@ class AdaptiveUIEnv(Environment):
             s = float(np.clip(0.99 - self.state.annoyance, 0.01, 0.99))
             reward = self._squash(s)
             
-        return StepResult(observation=self._get_obs(), reward=reward, done=done)
+        obs = self._get_obs()
+        obs.reward = reward
+        obs.done = done
+        return obs
