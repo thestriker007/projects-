@@ -1,7 +1,10 @@
 from pydantic import BaseModel, Field
 from typing import Literal
-from openenv.core import Action, Observation
+from openenv.core import Action, Observation, State
 
+class UIState(State):
+    grader_score: float = Field(0.01, description="Current grader score")
+    
 class UIAction(Action):
     layout: Literal["grid", "list", "hero"] = Field(..., description="UI layout type")
     cta_style: Literal["subtle", "bold", "pulsing"] = Field(..., description="Call-to-action intensity")

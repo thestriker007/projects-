@@ -2,10 +2,10 @@ import numpy as np
 import math
 from typing import Dict, Any, Optional
 from openenv.core.env_server import Environment
-from models import UIAction, UIObservation
+from models import UIAction, UIObservation, UIState
 from pydantic import BaseModel
 
-class UIState(BaseModel):
+class UIInternalState(BaseModel):
     annoyance: float = 0.0
     engagement: float = 0.0
     organic_decay: float = 0.0
@@ -18,18 +18,18 @@ class AdaptiveUIEnv(Environment):
         self.task_id = task_id
         self.decay_rate = decay_rate
         self.annoyance_multiplier = annoyance_multiplier
-        self.state = UIState()
+        self._internal_state = UIInternalState()
 
-    def reset(self, config: Optional[Dict[str, Any]] = None) -> UIObservation:
-        self.state = UIState()
+    def reset(self, seed: Optional[int] = None, episode_id: Optional[str] = None, config: Optional[Dict[str, Any]] = None, **kwargs) -> UIObservation:
+        self._internal_state = UIInternalState()
         return self._get_obs()
 
     def _get_obs(self) -> UIObservation:
         return UIObservation(
-            annoyance_level=float(np.clip(self.state.annoyance, 0, 1)),
-            engagement_score=float(np.clip(self.state.engagement, 0, 1)),
-            organic_exit_risk=float(np.clip(self.state.organic_decay, 0, 1)),
-            session_duration=self.state.session_duration
+            annoyance_level=float(np.clip(self._internal_state.annoyance, 0, 1)),
+            engagement_score=float(np.clip(self._internal_state.engagement, 0, 1)),
+            organic_exit_risk=float(np.clip(self._internal_state.organic_decay, 0, 1)),
+            session_duration=self._internal_state.session_duration
         )
 
     def _squash(self, val: float) -> float:
@@ -39,8 +39,27 @@ class AdaptiveUIEnv(Environment):
         sig = 1.0 / (1.0 + math.exp(-k * (r - r_mid)))
         return float(np.clip(0.01 + 0.98 * sig, 0.01, 0.99))
 
+    @property
+    def state(self) -> UIState:
+        # 2. Causal Attribution & Reward Calculation
+        reward = 0.5
+        
+        if self.task_id in ["easy", "ui_easy_retention"]:
+            s = 0.1 + 0.8 * min(self._internal_state.session_duration / 30.0, 0.99)
+            reward = self._squash(s)
+        elif self.task_id in ["medium", "ui_med_conversion"]:
+            s = 0.2
+            if self._internal_state.clicked:
+                s += 0.79
+            reward = self._squash(s)
+        elif self.task_id in ["hard", "ui_hard_fatigue"]:
+            s = float(np.clip(0.99 - self._internal_state.annoyance, 0.01, 0.99))
+            reward = self._squash(s)
+            
+        return UIState(grader_score=reward)
+
     def step(self, action: UIAction, timeout_s: Optional[float] = None, **kwargs) -> UIObservation:
-        self.state.session_duration += 1.0
+        self._internal_state.session_duration += 1.0
         
         # 1. Physics: Simulate User Reaction based on UI Choices
         friction = 0.0
@@ -75,48 +94,28 @@ class AdaptiveUIEnv(Environment):
         friction *= self.annoyance_multiplier
         
         # Apply state changes
-        self.state.annoyance = float(np.clip(self.state.annoyance + friction, 0.0, 1.0))
-        self.state.engagement = float(np.clip(self.state.engagement + engagement_boost, 0.0, 1.0))
+        self._internal_state.annoyance = float(np.clip(self._internal_state.annoyance + friction, 0.0, 1.0))
+        self._internal_state.engagement = float(np.clip(self._internal_state.engagement + engagement_boost, 0.0, 1.0))
         
         # Organic decay models the user's natural drop-off over time
-        self.state.organic_decay = float(np.clip(self.state.organic_decay + self.decay_rate, 0.0, 1.0))
+        self._internal_state.organic_decay = float(np.clip(self._internal_state.organic_decay + self.decay_rate, 0.0, 1.0))
 
-        if self.state.engagement > 0.8:
-            self.state.clicked = True
+        if self._internal_state.engagement > 0.8:
+            self._internal_state.clicked = True
 
         # Termination Conditions
         done = False
         
-        if self.state.annoyance > 0.85:
+        if self._internal_state.annoyance > 0.85:
             done = True
-        elif self.state.organic_decay > 0.95:
+        elif self._internal_state.organic_decay > 0.95:
             done = True
-        elif self.state.clicked and self.task_id != "easy":
+        elif self._internal_state.clicked and self.task_id != "easy":
             done = True
-        elif self.state.session_duration >= 30 and self.task_id == "easy":
+        elif self._internal_state.session_duration >= 30 and self.task_id == "easy":
             done = True
 
-        # 2. Causal Attribution & Reward Calculation
-        reward = 0.5
-        
-        if self.task_id in ["easy", "ui_easy_retention"]:
-            # Task: Maintain engagement for 30s with a "patient" user.
-            s = 0.1 + 0.8 * min(self.state.session_duration / 30.0, 0.99)
-            reward = self._squash(s)
-            
-        elif self.task_id in ["medium", "ui_med_conversion"]:
-            # Task: Guide a "distracted" user to click a CTA.
-            s = 0.2
-            if self.state.clicked:
-                s += 0.79
-            reward = self._squash(s)
-            
-        elif self.task_id in ["hard", "ui_hard_fatigue"]:
-            # Task: Maximize clicks while keeping "Annoyance" < 0.4.
-            s = float(np.clip(0.99 - self.state.annoyance, 0.01, 0.99))
-            reward = self._squash(s)
-            
         obs = self._get_obs()
-        obs.reward = reward
+        obs.reward = self.state.grader_score
         obs.done = done
         return obs
